@@ -57,6 +57,24 @@ public class Manager : MonoBehaviour
         
         GetQuestion();
     }
+    public void OnDownReturnButton()
+    {
+     
+        GameObject go = GameObject.Find("ReturnImage");
+        LeanTween.value(go, Vector3.one, new Vector3(1.1f, 1.1f, 1.1f), 0.5f).setOnUpdate((Vector3 vec) => 
+        {
+            go.transform.localScale = vec;
+        });
+    }
+    public void OnUpReturnButton()
+    {
+        LeanTween.cancelAll();
+        GameObject go = GameObject.Find("ReturnImage");
+        LeanTween.value(go, go.transform.localScale, Vector3.one, 0.5f).setOnUpdate((Vector3 vec) =>
+        {
+            go.transform.localScale = vec;
+        });
+    }
     public void OnClick()
     {
         Application.LoadLevel("startScene");
@@ -106,6 +124,14 @@ public class Manager : MonoBehaviour
                 b = Random.Range(0, 20);
                 c = Random.Range(0, 20);
                 d = Random.Range(0, 20);
+                while (a<10 && b<10 && c<10 && d<10)
+                {
+                    a = Random.Range(0, 20);
+                    b = Random.Range(0, 20);
+                    c = Random.Range(0, 20);
+                    d = Random.Range(0, 20);
+                }
+                
             }
             results = Calc(a, b, c, d);
             if (results.Count != 0)
