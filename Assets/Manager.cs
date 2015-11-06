@@ -13,8 +13,10 @@ public class Manager : MonoBehaviour
     List<string> l4 = new List<string>() { "+", "-", "x", "/" };
     List<string> allMethod = new List<string>();
     bool getNext = false;
-
+    
     List<string> lastAnswer = null;
+
+    public AudioSource clickSound;
     void Start()
     {
         for (int i = 0; i < l1.Count; i++)
@@ -46,8 +48,14 @@ public class Manager : MonoBehaviour
         }
         if (StartSceneSetting.instance)
         {
-            
+            if (StartSceneSetting.instance.level == 0)
+            {
                 StartSceneSetting.instance.PlayBGM(1);
+            }
+            else
+            {
+                StartSceneSetting.instance.PlayBGM(Random.Range(2, 6));
+            }
                 Vector3 vec = GameObject.Find("birds").transform.position;
                 vec.y = StartSceneSetting.instance.audio.volume*Screen.height;
                 GameObject.Find("birds").transform.position = vec;
@@ -59,9 +67,9 @@ public class Manager : MonoBehaviour
     }
     public void OnDownReturnButton()
     {
-     
+
         GameObject go = GameObject.Find("ReturnImage");
-        LeanTween.value(go, Vector3.one, new Vector3(1.1f, 1.1f, 1.1f), 0.5f).setOnUpdate((Vector3 vec) => 
+        LeanTween.value(go, Vector3.one, new Vector3(1.1f, 1.1f, 1.1f), 0.5f).setOnUpdate((Vector3 vec) =>
         {
             go.transform.localScale = vec;
         });
@@ -77,7 +85,18 @@ public class Manager : MonoBehaviour
     }
     public void OnClick()
     {
-        Application.LoadLevel("startScene");
+        
+        StartCoroutine(LoadLevelDelay("startScene"));
+        
+    }
+    IEnumerator LoadLevelDelay(string name)
+    {
+        clickSound.Play();
+        while (clickSound.isPlaying)
+        {
+            yield return null;
+        }
+        Application.LoadLevel(name);
     }
     public void OnDrag()
     {
@@ -124,14 +143,13 @@ public class Manager : MonoBehaviour
                 b = Random.Range(0, 20);
                 c = Random.Range(0, 20);
                 d = Random.Range(0, 20);
-                while (a<10 && b<10 && c<10 && d<10)
+                while (a < 10 && b < 10 && c < 10 && d < 10)
                 {
                     a = Random.Range(0, 20);
                     b = Random.Range(0, 20);
                     c = Random.Range(0, 20);
                     d = Random.Range(0, 20);
                 }
-                
             }
             results = Calc(a, b, c, d);
             if (results.Count != 0)
@@ -149,6 +167,8 @@ public class Manager : MonoBehaviour
     }
     public void PressButton()
     {
+
+        clickSound.Play();
         if (getNext)
         {
             GetQuestion();
@@ -156,12 +176,12 @@ public class Manager : MonoBehaviour
             GameObject.Find("answerText0").GetComponent<Text>().text = "";
             GameObject.Find("answerText1").GetComponent<Text>().text = "";
             GameObject.Find("answerText2").GetComponent<Text>().text = "";
-            GameObject.Find("ButtonText").GetComponent<Text>().text = "GetAnswer";
+            GameObject.Find("ButtonText").GetComponent<Text>().text = "答案";
         }
         else
         {
             getNext = true;
-            GameObject.Find("ButtonText").GetComponent<Text>().text = "Next";
+            GameObject.Find("ButtonText").GetComponent<Text>().text = "下道题";
             GameObject.Find("answerText0").GetComponent<Text>().text = lastAnswer[0];
 //             if (lastAnswer.Count==2)
 //             {

@@ -6,25 +6,57 @@ public class StartSceneRun : MonoBehaviour {
 
     public Button button1;
     public Button button2;
+
+    public AudioSource clickSound;
 	void Start () {
         button1.onClick.AddListener(() =>
         {
             //handle click here
-            StartSceneSetting.instance.level = 0;
-            Application.LoadLevel("game");
+            if (StartSceneSetting.instance)
+            {
+                StartSceneSetting.instance.level = 0;
+            }
+            StartCoroutine(LoadLevelDelay("game"));
         });
         button2.onClick.AddListener(() =>
         {
             //handle click here
-            StartSceneSetting.instance.level = 1;
-            Application.LoadLevel("game");
+            if (StartSceneSetting.instance)
+            {
+                StartSceneSetting.instance.level = 1;
+            }
+            StartCoroutine(LoadLevelDelay("game"));
         });
-        StartSceneSetting.instance.PlayBGM(0);
+        if (StartSceneSetting.instance)
+        {
+            StartSceneSetting.instance.PlayBGM(0);
+        }
+       
        
 	}
+    
+        void Update()
+    {
+        if (Application.platform == RuntimePlatform.Android && (Input.GetKeyDown(KeyCode.Escape)))
+        {
+            Application.Quit();
+        }
+    }
+    
 	public void OnClick()
     {
         StartSceneSetting.instance.playBgm = !StartSceneSetting.instance.playBgm;
+    }
+
+    IEnumerator LoadLevelDelay(string name)
+    {
+        clickSound.Play();
+        while (clickSound.isPlaying)
+        {
+            yield return null;
+        }
+        
+        Application.LoadLevel(name);
     }
 	
 }
