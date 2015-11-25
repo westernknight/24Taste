@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 
-public class StartSceneRun : MonoBehaviour {
+public class StartSceneScript : MonoBehaviour {
 
     public Button button1;
     public Button button2;
@@ -16,7 +16,7 @@ public class StartSceneRun : MonoBehaviour {
             {
                 StartSceneSetting.instance.level = 0;
             }
-            StartCoroutine(LoadLevelDelay("game"));
+            StartCoroutine(LoadLevelDelay("game_click"));
         });
         button2.onClick.AddListener(() =>
         {
@@ -25,7 +25,7 @@ public class StartSceneRun : MonoBehaviour {
             {
                 StartSceneSetting.instance.level = 1;
             }
-            StartCoroutine(LoadLevelDelay("game"));
+            StartCoroutine(LoadLevelDelay("game_click"));
         });
         if (StartSceneSetting.instance)
         {

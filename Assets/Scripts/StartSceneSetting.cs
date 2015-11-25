@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 public class StartSceneSetting : MonoBehaviour
 {
+    
 
     public int level = 0;
     public static StartSceneSetting instance;
