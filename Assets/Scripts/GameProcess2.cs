@@ -6,7 +6,8 @@ using UnityEngine.EventSystems;
 
 public class GameProcess2 : MonoBehaviour
 {
-    public int oneQuestionTime = 15;
+    public static GameProcess2 instance;
+    public int oneQuestionTime = 18;
     public class AnswerStruct
     {
         public bool has = false;
@@ -18,9 +19,11 @@ public class GameProcess2 : MonoBehaviour
     List<GameObject> questionButtons = new List<GameObject>();
 
     Text typeInText;
+    Text answerText;
     GameObject resetButton;
 
     GameObject birds;
+    GameObject score;
 
     List<string> inputNumbers = new List<string>();
     List<string> inputOperators = new List<string>();
@@ -30,11 +33,19 @@ public class GameProcess2 : MonoBehaviour
     List<string> allMethod = new List<string>();
 
     AnswerStruct answer = new AnswerStruct();
+
+    TimeCounter timeCounter;
+    public AudioSource clickSound;
+    void Awake()
+    {
+        instance = this;
+    }
     void Start()
     {
         GameObject OperatorButtons = GameObject.Find("OperatorButtons");
         GameObject QuestionButtons = GameObject.Find("QuestionButtons");
 
+       
 
         for (int i = 0; i < OperatorButtons.transform.childCount; i++)
         {
@@ -45,8 +56,13 @@ public class GameProcess2 : MonoBehaviour
             questionButtons.Add(QuestionButtons.transform.GetChild(i).gameObject);
         }
         typeInText = GameObject.Find("typeInText").GetComponent<Text>();
+        answerText =  GameObject.Find("answerText").GetComponent<Text>();
+        answerText.text = "";
         birds = GameObject.Find("birds");
         resetButton = GameObject.Find("resetButton");
+        typeInText.text = "";
+        score = GameObject.Find("score");
+        score.GetComponent<Text>().text = "0";
 
         List<string> l1 = new List<string>() { "+", "-", "x", "/" };
         List<string> l2 = new List<string>() { "+", "-", "x", "/" };
@@ -79,11 +95,114 @@ public class GameProcess2 : MonoBehaviour
         {
             allMethod[i] = allMethod[i].Remove(allMethod[i].Length - 1);
         }
+
+         timeCounter = GameObject.FindObjectOfType<TimeCounter>();
+        timeCounter.timeOutEvent += () => 
+        {
+            string sz = "(" + "(" + answer.numbers[0] + answer.operators[0] + answer.numbers[1] + ")" + answer.operators[1] + answer.numbers[2] + ")" + answer.operators[2] + answer.numbers[3];
+            sz += " = 24";
+            answerText.text = sz;
+            answerText.color = Color.red;
+            SetButtonToNext();
+            
+        };
+
         GetQuestion();
+
+
+        ///setting
+        if (StartSceneSetting.instance)
+        {
+            if (StartSceneSetting.instance.level == 0)
+            {
+                StartSceneSetting.instance.PlayBGM(1);
+            }
+            else
+            {
+                StartSceneSetting.instance.PlayBGM(Random.Range(2, 6));
+            }
+            Vector3 vec = GameObject.Find("birds").transform.position;
+            vec.y = StartSceneSetting.instance.audio.volume * Screen.height/2;
+            GameObject.Find("birds").transform.position = vec;
+
+
+        }
+    }
+    public void OnClickBackToStartScene()
+    {
+
+        StartCoroutine(LoadLevelDelay("startScene"));
+
+    }
+    public void OnDownReturnButton()
+    {
+
+        GameObject go = GameObject.Find("ReturnImage");
+        LeanTween.value(go, Vector3.one, new Vector3(1.1f, 1.1f, 1.1f), 0.5f).setOnUpdate((Vector3 vec) =>
+        {
+            go.transform.localScale = vec;
+        });
+    }
+    public void OnUpReturnButton()
+    {
+        LeanTween.cancelAll();
+        GameObject go = GameObject.Find("ReturnImage");
+        LeanTween.value(go, go.transform.localScale, Vector3.one, 0.5f).setOnUpdate((Vector3 vec) =>
+        {
+            go.transform.localScale = vec;
+        });
+    }
+    public void OnDrag()
+    {
+        Vector3 vec = GameObject.Find("birds").transform.position;
+        vec.y = Input.mousePosition.y;
+        if (vec.y > Screen.height / 2)
+        {
+            vec.y = Screen.height / 2;
+        }
+        GameObject.Find("birds").transform.position = vec;
+
+        if (StartSceneSetting.instance)
+        {
+            StartSceneSetting.instance.SetBGMVolumn(vec.y / (Screen.height / 2));
+        }
+
+        //Debug.Log("here" + Input.mousePosition);
+    }
+    IEnumerator LoadLevelDelay(string name)
+    {
+
+        clickSound.Play();
+        while (clickSound.isPlaying)
+        {
+            yield return null;
+        }
+        Application.LoadLevel(name);
     }
     public void OnClick(GameObject go)
     {
-        if (inputNumbers.Count==inputOperators.Count)
+        if (go == resetButton)
+        {
+            if (resetButton.transform.GetChild(0).GetComponent<Text>().text=="下 一 题")
+            {
+                if (answerText.text!="")
+                {
+                    score.GetComponent<Text>().text = "0";
+                }
+                answerText.text = "";
+                GetQuestion();
+                SetButtonToReset();
+            }
+            inputNumbers.Clear();
+            inputOperators.Clear();
+            for (int i = 0; i < questionButtons.Count; i++)
+            {
+                questionButtons[i].GetComponent<CanvasGroup>().alpha = 1;
+            }
+            typeInText.text = "";
+            
+        }
+        else if (inputNumbers.Count==inputOperators.Count)
         {
             if (questionButtons.Contains(go))
             {
@@ -92,27 +211,130 @@ public class GameProcess2 : MonoBehaviour
                     inputNumbers.Add(go.transform.GetChild(0).GetComponent<Text>().text);
                     go.GetComponent<CanvasGroup>().alpha = 0.3f;
                 }
-
             }
+            
         }
-        if (inputNumbers.Count==inputOperators.Count+1)
+        else if (inputNumbers.Count==inputOperators.Count+1)
         {
             if (operationButtons.Contains(go))
             {
                 inputOperators.Add(go.transform.GetChild(0).GetComponent<Text>().text);
             }
-        }
-        if (go == resetButton)
-        {
-            inputNumbers.Clear();
-            inputOperators.Clear();
-            typeInText.text = "";
+            if (inputOperators.Count==3)
+            {
+                GameObject last = null;
+                for (int i = 0; i < questionButtons.Count; i++)
+                {
+                    if ( questionButtons[i].GetComponent<CanvasGroup>().alpha == 1)
+                    {
+                        last = questionButtons[i];
+                        break;
+                    }
+                }
+                last.GetComponent<CanvasGroup>().alpha = 0.3f;
+                inputNumbers.Add(last.transform.GetChild(0).GetComponent<Text>().text);
+            }
         }
         
+        PrintTypeInText();
     }
+  
     void PrintTypeInText()
     {
+        string sz = "";
 
+        if (inputNumbers.Count==1)
+        {
+            sz += inputNumbers[0];
+            if (inputOperators.Count==1)
+            {
+                sz += inputOperators[0];
+            }
+        }
+        else if (inputNumbers.Count==2)
+        {            
+            if (inputOperators.Count==2)
+            {
+                sz += "(";
+                sz += inputNumbers[0];
+                sz += inputOperators[0];
+                sz += inputNumbers[1];
+                sz += ")";
+                sz += inputOperators[1];
+            }
+            else//1
+            {
+                sz += inputNumbers[0];
+                sz += inputOperators[0];
+                sz += inputNumbers[1];
+            }
+        }
+        else if (inputNumbers.Count==3)
+        {
+            if (inputOperators.Count == 3)
+            {
+                sz += "((";
+                sz += inputNumbers[0];
+                sz += inputOperators[0];
+                sz += inputNumbers[1];
+                sz += ")";
+                sz += inputOperators[1];
+                sz += inputNumbers[2];
+                sz += ")";
+                sz += inputOperators[2];
+            }
+            else//2
+            {
+                sz += "(";
+                sz += inputNumbers[0];
+                sz += inputOperators[0];
+                sz += inputNumbers[1];
+                sz += ")";
+                sz += inputOperators[1];
+                sz += inputNumbers[2];      
+            }
+
+        }
+        else if (inputNumbers.Count == 4)
+        {
+            sz += "((";
+            sz += inputNumbers[0];
+            sz += inputOperators[0];
+            sz += inputNumbers[1];
+            sz += ")";
+            sz += inputOperators[1];
+            sz += inputNumbers[2];
+            sz += ")";
+            sz += inputOperators[2];
+            sz += inputNumbers[3];
+            sz += " = ";
+            string recount = Recount(inputNumbers, inputOperators).ToString();
+            sz += recount;
+
+            if (recount == "24")
+            {
+                FinishOneQuestion();
+            }
+        }
+        typeInText.text = sz;
+        
+
+    }
+    void FinishOneQuestion()
+    {
+        int n = int.Parse(score.GetComponent<Text>().text);
+        n++;
+        score.GetComponent<Text>().text = n.ToString();
+        SetButtonToNext();
+        timeCounter.Pause();
+    }
+    void SetButtonToNext()
+    {
+        resetButton.transform.GetChild(0).GetComponent<Text>().text = "下 一 题";
+    }
+    void SetButtonToReset()
+    {
+        resetButton.transform.GetChild(0).GetComponent<Text>().text = "重    置";
     }
     float Recount(List<string> numbers,List<string> operators)
     {
@@ -131,7 +353,7 @@ public class GameProcess2 : MonoBehaviour
             {
                 result -= float.Parse(numbers[i]);
             }
-            if (operators[i - 1] == "/")
+            if (operators[i - 1] == "÷")
             {
                 try
                 {
@@ -148,6 +370,7 @@ public class GameProcess2 : MonoBehaviour
     }
     void GetQuestion()
     {
+        timeCounter.ResetAndStart();
         AnswerStruct results = new AnswerStruct();
         while (results.has == false)
         {
@@ -189,15 +412,15 @@ public class GameProcess2 : MonoBehaviour
                 string q = "" + a + "    " + "" + b + "    " + "" + c + "    " + "" + d + "    ";
                 Debug.Log(q);
 
-                string answer = "(" + "(" + results.numbers[0] + results.operators[0] + results.numbers[1] + ")" + results.operators[1] + results.numbers[2] + ")" + results.operators[2] + results.numbers[3];
+                string sz = "(" + "(" + results.numbers[0] + results.operators[0] + results.numbers[1] + ")" + results.operators[1] + results.numbers[2] + ")" + results.operators[2] + results.numbers[3];
 
-                Debug.Log(answer);
+                Debug.Log(sz);
 
                 for (int i = 0; i < 4; i++)
                 {
                     questionButtons[i].transform.GetChild(0).GetComponent<Text>().text = results.numbers[i].ToString();
                 }
-                
+                answer = results;
 
             }
         }

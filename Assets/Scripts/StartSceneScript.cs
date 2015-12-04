@@ -16,7 +16,7 @@ public class StartSceneScript : MonoBehaviour {
             {
                 StartSceneSetting.instance.level = 0;
             }
-            StartCoroutine(LoadLevelDelay("game_click"));
+            StartCoroutine(LoadLevelDelay("game"));
         });
         button2.onClick.AddListener(() =>
         {
@@ -25,7 +25,7 @@ public class StartSceneScript : MonoBehaviour {
             {
                 StartSceneSetting.instance.level = 1;
             }
-            StartCoroutine(LoadLevelDelay("game_click"));
+            StartCoroutine(LoadLevelDelay("game"));
         });
         if (StartSceneSetting.instance)
         {
