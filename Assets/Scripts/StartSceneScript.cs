@@ -30,10 +30,18 @@ public class StartSceneScript : MonoBehaviour {
         if (StartSceneSetting.instance)
         {
             StartSceneSetting.instance.PlayBGM(0);
+            StartSceneSetting.instance.InitSoundBirds();
         }
        
        
 	}
+public void OnDrag()
+    {
+        if (StartSceneSetting.instance)
+        {
+            StartSceneSetting.instance.OnDrag();
+        }
+    }
     
         void Update()
     {

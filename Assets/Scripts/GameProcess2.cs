@@ -6,6 +6,18 @@ using UnityEngine.EventSystems;
 
 public class GameProcess2 : MonoBehaviour
 {
+    enum RecountType
+    {
+        firstFirst,
+        twoSide,
+        middleLeft,
+        middleRight,
+        lastFirst,
+    }
+    public Sprite simpleLevelBk;
+    public Sprite hardLevelBk;
+    public bool isDebugRandom = false;
+    public int debugNum = 0;
     public static GameProcess2 instance;
     public int oneQuestionTime = 18;
     public class AnswerStruct
@@ -22,7 +34,7 @@ public class GameProcess2 : MonoBehaviour
     Text answerText;
     GameObject resetButton;
 
-    GameObject birds;
+
     GameObject score;
 
     List<string> inputNumbers = new List<string>();
@@ -45,7 +57,7 @@ public class GameProcess2 : MonoBehaviour
         GameObject OperatorButtons = GameObject.Find("OperatorButtons");
         GameObject QuestionButtons = GameObject.Find("QuestionButtons");
 
-       
+
 
         for (int i = 0; i < OperatorButtons.transform.childCount; i++)
         {
@@ -56,9 +68,9 @@ public class GameProcess2 : MonoBehaviour
             questionButtons.Add(QuestionButtons.transform.GetChild(i).gameObject);
         }
         typeInText = GameObject.Find("typeInText").GetComponent<Text>();
-        answerText =  GameObject.Find("answerText").GetComponent<Text>();
+        answerText = GameObject.Find("answerText").GetComponent<Text>();
         answerText.text = "";
-        birds = GameObject.Find("birds");
+        //birds = GameObject.Find("birds");
         resetButton = GameObject.Find("resetButton");
         typeInText.text = "";
         score = GameObject.Find("score");
@@ -96,19 +108,18 @@ public class GameProcess2 : MonoBehaviour
             allMethod[i] = allMethod[i].Remove(allMethod[i].Length - 1);
         }
 
-         timeCounter = GameObject.FindObjectOfType<TimeCounter>();
-        timeCounter.timeOutEvent += () => 
+        timeCounter = GameObject.FindObjectOfType<TimeCounter>();
+        timeCounter.timeOutEvent += () =>
         {
             string sz = "(" + "(" + answer.numbers[0] + answer.operators[0] + answer.numbers[1] + ")" + answer.operators[1] + answer.numbers[2] + ")" + answer.operators[2] + answer.numbers[3];
             sz += " = 24";
             answerText.text = sz;
             answerText.color = Color.red;
             SetButtonToNext();
-            
+
         };
-
-        GetQuestion();
-
+        
+        
 
         ///setting
         if (StartSceneSetting.instance)
@@ -116,16 +127,27 @@ public class GameProcess2 : MonoBehaviour
             if (StartSceneSetting.instance.level == 0)
             {
                 StartSceneSetting.instance.PlayBGM(1);
+                GameObject.Find("bk").GetComponent<Image>().overrideSprite = simpleLevelBk;
             }
             else
             {
                 StartSceneSetting.instance.PlayBGM(Random.Range(2, 6));
+                GameObject.Find("bk").GetComponent<Image>().overrideSprite =  hardLevelBk;
             }
-            Vector3 vec = GameObject.Find("birds").transform.position;
-            vec.y = StartSceneSetting.instance.audio.volume * Screen.height/2;
-            GameObject.Find("birds").transform.position = vec;
+            StartSceneSetting.instance.InitSoundBirds();
+            oneQuestionTime = oneQuestionTime * (StartSceneSetting.instance.level + 1);
 
+            
+        }
 
+        GetQuestion();
+        SetButtonToReset();
+    }
+    public void OnDrag()
+    {
+        if (StartSceneSetting.instance)
+        {
+            StartSceneSetting.instance.OnDrag();
         }
     }
     public void OnClickBackToStartScene()
@@ -152,23 +174,23 @@ public class GameProcess2 : MonoBehaviour
             go.transform.localScale = vec;
         });
     }
-    public void OnDrag()
-    {
-        Vector3 vec = GameObject.Find("birds").transform.position;
-        vec.y = Input.mousePosition.y;
-        if (vec.y > Screen.height / 2)
-        {
-            vec.y = Screen.height / 2;
-        }
-        GameObject.Find("birds").transform.position = vec;
-
-        if (StartSceneSetting.instance)
-        {
-            StartSceneSetting.instance.SetBGMVolumn(vec.y / (Screen.height / 2));
-        }
-
-        //Debug.Log("here" + Input.mousePosition);
-    }
+//     public void OnDrag()
+//     {
+//         Vector3 vec = GameObject.Find("birds").transform.position;
+//         vec.y = Input.mousePosition.y;
+//         if (vec.y > Screen.height / 2)
+//         {
+//             vec.y = Screen.height / 2;
+//         }
+//         GameObject.Find("birds").transform.position = vec;
+// 
+//         if (StartSceneSetting.instance)
+//         {
+//             StartSceneSetting.instance.SetBGMVolumn(vec.y / (Screen.height / 2));
+//         }
+// 
+//         //Debug.Log("here" + Input.mousePosition);
+//     }
     IEnumerator LoadLevelDelay(string name)
     {
 
@@ -183,9 +205,9 @@ public class GameProcess2 : MonoBehaviour
     {
         if (go == resetButton)
         {
-            if (resetButton.transform.GetChild(0).GetComponent<Text>().text=="下 一 题")
+            if (resetButton.transform.GetChild(0).GetComponent<Text>().text == "下 一 题")
             {
-                if (answerText.text!="")
+                if (answerText.text != "")
                 {
                     score.GetComponent<Text>().text = "0";
                 }
@@ -200,9 +222,9 @@ public class GameProcess2 : MonoBehaviour
                 questionButtons[i].GetComponent<CanvasGroup>().alpha = 1;
             }
             typeInText.text = "";
-            
+
         }
-        else if (inputNumbers.Count==inputOperators.Count)
+        else if (inputNumbers.Count == inputOperators.Count)
         {
             if (questionButtons.Contains(go))
             {
@@ -212,20 +234,20 @@ public class GameProcess2 : MonoBehaviour
                     go.GetComponent<CanvasGroup>().alpha = 0.3f;
                 }
             }
-            
+
         }
-        else if (inputNumbers.Count==inputOperators.Count+1)
+        else if (inputNumbers.Count == inputOperators.Count + 1)
         {
             if (operationButtons.Contains(go))
             {
                 inputOperators.Add(go.transform.GetChild(0).GetComponent<Text>().text);
             }
-            if (inputOperators.Count==3)
+            if (inputOperators.Count == 3 && inputNumbers.Count == 3)
             {
                 GameObject last = null;
                 for (int i = 0; i < questionButtons.Count; i++)
                 {
-                    if ( questionButtons[i].GetComponent<CanvasGroup>().alpha == 1)
+                    if (questionButtons[i].GetComponent<CanvasGroup>().alpha == 1)
                     {
                         last = questionButtons[i];
                         break;
@@ -235,31 +257,31 @@ public class GameProcess2 : MonoBehaviour
                 inputNumbers.Add(last.transform.GetChild(0).GetComponent<Text>().text);
             }
         }
-        
+
         PrintTypeInText();
     }
-  
+
     void PrintTypeInText()
     {
         string sz = "";
 
-        if (inputNumbers.Count==1)
+        if (inputNumbers.Count == 1)
         {
             sz += inputNumbers[0];
-            if (inputOperators.Count==1)
+            if (inputOperators.Count == 1)
             {
                 sz += inputOperators[0];
             }
         }
-        else if (inputNumbers.Count==2)
-        {            
-            if (inputOperators.Count==2)
+        else if (inputNumbers.Count == 2)
+        {
+            if (inputOperators.Count == 2)
             {
-                sz += "(";
+          
                 sz += inputNumbers[0];
                 sz += inputOperators[0];
                 sz += inputNumbers[1];
-                sz += ")";
+        
                 sz += inputOperators[1];
             }
             else//1
@@ -269,47 +291,130 @@ public class GameProcess2 : MonoBehaviour
                 sz += inputNumbers[1];
             }
         }
-        else if (inputNumbers.Count==3)
+        else if (inputNumbers.Count == 3)
         {
             if (inputOperators.Count == 3)
             {
-                sz += "((";
+     
                 sz += inputNumbers[0];
                 sz += inputOperators[0];
                 sz += inputNumbers[1];
-                sz += ")";
+          
                 sz += inputOperators[1];
                 sz += inputNumbers[2];
-                sz += ")";
+            
                 sz += inputOperators[2];
             }
             else//2
             {
-                sz += "(";
+        
                 sz += inputNumbers[0];
                 sz += inputOperators[0];
                 sz += inputNumbers[1];
-                sz += ")";
+          
                 sz += inputOperators[1];
-                sz += inputNumbers[2];      
+                sz += inputNumbers[2];
             }
 
         }
         else if (inputNumbers.Count == 4)
         {
-            sz += "((";
-            sz += inputNumbers[0];
-            sz += inputOperators[0];
-            sz += inputNumbers[1];
-            sz += ")";
-            sz += inputOperators[1];
-            sz += inputNumbers[2];
-            sz += ")";
-            sz += inputOperators[2];
-            sz += inputNumbers[3];
-            sz += " = ";
-            string recount = Recount(inputNumbers, inputOperators).ToString();
-            sz += recount;
+            RecountType rType;
+            string recount = Recount(inputNumbers, inputOperators, out rType).ToString();
+            switch (rType)
+            {
+                case RecountType.firstFirst:
+                    {
+                        sz += "((";
+                        sz += inputNumbers[0];
+                        sz += inputOperators[0];
+                        sz += inputNumbers[1];
+                        sz += ")";
+                        sz += inputOperators[1];
+                        sz += inputNumbers[2];
+                        sz += ")";
+                        sz += inputOperators[2];
+                        sz += inputNumbers[3];
+                        sz += " = ";
+                        sz += recount;
+                    }
+                    break;
+                case RecountType.twoSide:
+                    {
+                        sz += "(";
+                        sz += inputNumbers[0];
+                        sz += inputOperators[0];
+                        sz += inputNumbers[1];
+                        sz += ")";
+                        sz += inputOperators[1];
+                        sz += "(";
+                        sz += inputNumbers[2];              
+                        sz += inputOperators[2];
+                        sz += inputNumbers[3];
+                        sz += ")";
+                        sz += " = ";
+                        sz += recount;
+                    }
+                    break;
+                case RecountType.middleLeft:
+                    {
+                        sz += "(";
+                        sz += inputNumbers[0];
+                        sz += inputOperators[0];
+                        sz += "(";
+                        sz += inputNumbers[1];                       
+                        sz += inputOperators[1];                        
+                        sz += inputNumbers[2];
+                        sz += "))";
+                        sz += inputOperators[2];
+                        sz += inputNumbers[3];              
+                        sz += " = ";
+                        sz += recount;
+                    }
+                    break;
+                case RecountType.middleRight:
+                    {
+                       
+                        sz += inputNumbers[0];
+                        sz += inputOperators[0];
+                        sz += "((";
+                        sz += inputNumbers[1];                      
+                        sz += inputOperators[1];                    
+                        sz += inputNumbers[2];
+                        sz += ")";
+                        sz += inputOperators[2];
+                        sz += inputNumbers[3];
+                        sz += ")";
+                        sz += " = ";
+                        sz += recount;
+                    }
+                    break;
+                case RecountType.lastFirst:
+                    {
+                
+                        sz += inputNumbers[0];
+                        sz += inputOperators[0];
+                        sz += "(";
+                        sz += inputNumbers[1];              
+                        sz += inputOperators[1];
+                        sz += "(";
+                        sz += inputNumbers[2];            
+                        sz += inputOperators[2];
+                        sz += inputNumbers[3];
+                        sz += "))";
+                        sz += " = ";
+                        sz += recount;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+
+
+
+
+           
 
             if (recount == "24")
             {
@@ -317,7 +422,7 @@ public class GameProcess2 : MonoBehaviour
             }
         }
         typeInText.text = sz;
-        
+
 
     }
     void FinishOneQuestion()
@@ -334,39 +439,110 @@ public class GameProcess2 : MonoBehaviour
     }
     void SetButtonToReset()
     {
-        resetButton.transform.GetChild(0).GetComponent<Text>().text = "重    置";
+        resetButton.transform.GetChild(0).GetComponent<Text>().text = "橡 皮 擦";
     }
-    float Recount(List<string> numbers,List<string> operators)
+    float Recount(List<string> numbers, List<string> operators, out RecountType rType)
     {
-        float result = float.Parse(numbers[0]);
-        for (int i = 1; i < numbers.Count; i++)
+        rType = RecountType.firstFirst;
+        if (numbers.Count != 4 || operators.Count != 3)
         {
-            if (operators[i - 1] == "+")
-            {
-                result += float.Parse(numbers[i]);
-            }
-            if (operators[i - 1] == "x")
-            {
-                result *= float.Parse(numbers[i]);
-            }
-            if (operators[i - 1] == "-")
-            {
-                result -= float.Parse(numbers[i]);
-            }
-            if (operators[i - 1] == "÷")
-            {
-                try
-                {
-                    result /= float.Parse(numbers[i]);
-                }
-                catch
-                {
-                    return 0;
+            Debug.Log("Recount faile.");
 
-                }
+            return 0;
+        }
+        float result = 0;
+
+		result = float.Parse(numbers[0]);
+		result = GetTwoNumberResult(result, float.Parse(numbers[1]), operators[0]);
+		result = GetTwoNumberResult(result, float.Parse(numbers[2]), operators[1]);
+		result = GetTwoNumberResult(result, float.Parse(numbers[3]), operators[2]);
+		if (result == 24)
+		{
+			rType = RecountType.firstFirst;
+			return result;
+		}
+
+
+        result = float.Parse(numbers[3]);
+        result = GetTwoNumberResult(result, float.Parse(numbers[2]), operators[2]);
+        result = GetTwoNumberResult(result, float.Parse(numbers[1]), operators[1]);
+        result = GetTwoNumberResult(result, float.Parse(numbers[0]), operators[0]);
+        if (result == 24)
+        {
+            rType = RecountType.lastFirst;
+            return result;
+        }
+
+        result = float.Parse(numbers[0]);
+        result = GetTwoNumberResult(result, float.Parse(numbers[1]), operators[0]);
+        float result2 = float.Parse(numbers[2]);
+        result2 = GetTwoNumberResult(result2, float.Parse(numbers[3]), operators[2]);
+        result = GetTwoNumberResult(result, result2, operators[1]);
+        if (result == 24)
+        {
+            rType = RecountType.twoSide;
+            return result;
+        }
+
+
+        result = float.Parse(numbers[1]);
+        result = GetTwoNumberResult(result, float.Parse(numbers[2]), operators[1]);
+        result = GetTwoNumberResult(float.Parse(numbers[0]), result, operators[0]);
+        result = GetTwoNumberResult(result, float.Parse(numbers[3]), operators[2]);
+
+        if (result == 24)
+        {
+            rType = RecountType.middleLeft;
+            return result;
+        }
+
+        result = float.Parse(numbers[1]);
+        result = GetTwoNumberResult(result, float.Parse(numbers[2]), operators[1]);
+        result = GetTwoNumberResult(result, float.Parse(numbers[3]), operators[2]);
+        result = GetTwoNumberResult(float.Parse(numbers[0]), result, operators[0]);
+
+        if (result == 24)
+        {
+            rType = RecountType.middleRight;
+            return result;
+        }
+
+
+		result = float.Parse(numbers[0]);
+		result = GetTwoNumberResult(result, float.Parse(numbers[1]), operators[0]);
+		result = GetTwoNumberResult(result, float.Parse(numbers[2]), operators[1]);
+		result = GetTwoNumberResult(result, float.Parse(numbers[3]), operators[2]);
+
+
+        return result;
+    }
+    float GetTwoNumberResult(float a, float b, string o)
+    {
+        if (o == "+")
+        {
+            a += b;
+        }
+        if (o == "x")
+        {
+            a *= b;
+        }
+        if (o == "-")
+        {
+            a -= b;
+        }
+        if (o == "÷")
+        {
+            try
+            {
+                a /= b;
+            }
+            catch
+            {
+                return 0;
+
             }
         }
-        return result;
+        return a;
     }
     void GetQuestion()
     {
@@ -378,6 +554,12 @@ public class GameProcess2 : MonoBehaviour
             int b = 0;
             int c = 0;
             int d = 0;
+            Random.seed = System.Environment.TickCount;
+            Debug.Log("Random.seed = "+Random.seed);
+            if (isDebugRandom)
+            {
+                Random.seed = debugNum;
+            }
             if (StartSceneSetting.instance == null)
             {
                 a = Random.Range(1, 10);

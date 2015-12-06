@@ -22,6 +22,8 @@ public class StartSceneSetting : MonoBehaviour
         Screen.SetResolution(476, 847, true);
         DontDestroyOnLoad(gameObject);
         DontDestroyOnLoad(audio);
+
+       
     }
     public void SetLevel(int l)
     {
@@ -40,6 +42,30 @@ public class StartSceneSetting : MonoBehaviour
         //0-1
         audio.volume = vol;
     }
+    public void InitSoundBirds()
+    {
+        Vector3 vec = GameObject.Find("birds").transform.position;
+        vec.y = StartSceneSetting.instance.audio.volume * Screen.height / 2;
+        GameObject.Find("birds").transform.position = vec;
+    }
+
+    public void OnDrag()
+    {
+        Vector3 vec = GameObject.Find("birds").transform.position;
+        vec.y = Input.mousePosition.y;
+        if (vec.y > Screen.height / 2)
+        {
+            vec.y = Screen.height / 2;
+        }
+        GameObject.Find("birds").transform.position = vec;
+
+        if (StartSceneSetting.instance)
+        {
+            StartSceneSetting.instance.SetBGMVolumn(vec.y / (Screen.height / 2));
+        }
+
+        //Debug.Log("here" + Input.mousePosition);
+    }
     void Update()
     {
 
@@ -57,6 +83,15 @@ public class StartSceneSetting : MonoBehaviour
                     audio.Pause();
                 }
             }
+        }
+
+        if (Application.platform == RuntimePlatform.Android && (Input.GetKeyDown(KeyCode.Escape)))
+        {
+            if (Application.loadedLevelName != "startScene")
+            {
+                Application.LoadLevel("startScene");
+            }
+            
         }
     }
 }

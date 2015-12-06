@@ -66,7 +66,7 @@ public class TimeCounter : MonoBehaviour
                     string c = ((int)((nowTime) * 10) % 10).ToString();
                     string d = ((int)((nowTime) * 100) % 10).ToString();
                     timeText.text = a + b + "." + c + d;
-                    if (nowTime < 5)
+                    if (nowTime < GameProcess2.instance.oneQuestionTime/3.0f)
                     {
                         timeText.color = Color.red;
                     }
