@@ -2,13 +2,15 @@
 using System.Collections;
 using UnityEngine.UI;
 
-public class StartSceneScript : MonoBehaviour {
+public class StartSceneScript : MonoBehaviour
+{
 
     public Button button1;
     public Button button2;
 
     public AudioSource clickSound;
-	void Start () {
+    void Start()
+    {
         button1.onClick.AddListener(() =>
         {
             //handle click here
@@ -32,29 +34,33 @@ public class StartSceneScript : MonoBehaviour {
             StartSceneSetting.instance.PlayBGM(0);
             StartSceneSetting.instance.InitSoundBirds();
         }
-       
-       
-	}
-public void OnDrag()
+
+
+    }
+    public void OnClick()
+    {
+        if (StartSceneSetting.instance)
+        {
+            StartSceneSetting.instance.OnClick();
+        }
+    }
+    public void OnDrag()
     {
         if (StartSceneSetting.instance)
         {
             StartSceneSetting.instance.OnDrag();
         }
     }
-    
-        void Update()
+
+    void Update()
     {
         if (Application.platform == RuntimePlatform.Android && (Input.GetKeyDown(KeyCode.Escape)))
         {
             Application.Quit();
         }
     }
+
     
-	public void OnClick()
-    {
-        StartSceneSetting.instance.playBgm = !StartSceneSetting.instance.playBgm;
-    }
 
     IEnumerator LoadLevelDelay(string name)
     {
@@ -63,8 +69,8 @@ public void OnDrag()
         {
             yield return null;
         }
-        
+
         Application.LoadLevel(name);
     }
-	
+
 }

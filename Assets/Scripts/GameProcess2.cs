@@ -16,6 +16,12 @@ public class GameProcess2 : MonoBehaviour
     }
     public Sprite simpleLevelBk;
     public Sprite hardLevelBk;
+
+    public Sprite simpleLevelImage;
+    public Sprite hardLevelImage;
+
+    public List<Sprite> numList = new List<Sprite>();
+
     public bool isDebugRandom = false;
     public int debugNum = 0;
     public static GameProcess2 instance;
@@ -114,7 +120,7 @@ public class GameProcess2 : MonoBehaviour
             string sz = "(" + "(" + answer.numbers[0] + answer.operators[0] + answer.numbers[1] + ")" + answer.operators[1] + answer.numbers[2] + ")" + answer.operators[2] + answer.numbers[3];
             sz += " = 24";
             answerText.text = sz;
-            answerText.color = Color.red;
+            answerText.color = new Color(255 / 255.0f, 39 / 255.0f, 3 / 255.0f);
             SetButtonToNext();
 
         };
@@ -128,11 +134,13 @@ public class GameProcess2 : MonoBehaviour
             {
                 StartSceneSetting.instance.PlayBGM(1);
                 GameObject.Find("bk").GetComponent<Image>().overrideSprite = simpleLevelBk;
+                GameObject.Find("decorate").GetComponent<Image>().overrideSprite = simpleLevelImage;
             }
             else
             {
                 StartSceneSetting.instance.PlayBGM(Random.Range(2, 6));
-                GameObject.Find("bk").GetComponent<Image>().overrideSprite =  hardLevelBk;
+                GameObject.Find("bk").GetComponent<Image>().overrideSprite = hardLevelBk;
+                GameObject.Find("decorate").GetComponent<Image>().overrideSprite = hardLevelImage;
             }
             StartSceneSetting.instance.InitSoundBirds();
             oneQuestionTime = oneQuestionTime * (StartSceneSetting.instance.level + 1);
@@ -142,6 +150,13 @@ public class GameProcess2 : MonoBehaviour
 
         GetQuestion();
         SetButtonToReset();
+    }
+    public void OnClick()
+    {
+        if (StartSceneSetting.instance)
+        {
+            StartSceneSetting.instance.OnClick();
+        }
     }
     public void OnDrag()
     {

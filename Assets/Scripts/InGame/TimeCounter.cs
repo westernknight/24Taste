@@ -6,22 +6,22 @@ using System;
 public class TimeCounter : MonoBehaviour
 {
 
-    Text timeText;
+    public Text timeText;
     float elapseTime = 0;
     const float readDelay = 0.5f;
     float elapseReadDelay = 2;
     bool running = false;
 
+
     public Action timeOutEvent;
     void Start()
     {
-        timeText = GetComponentInChildren<Text>();
-
+       
     }
 
     public void ResetAndStart()
     {
-        timeText.color = new Color(0, 111 / 255.0f, 33 / 255.0f);
+        timeText.color = new Color(201/255.0f, 220 / 255.0f, 48 / 255.0f);
         running = true;
         elapseTime = 0;
         elapseReadDelay = readDelay;
@@ -68,7 +68,7 @@ public class TimeCounter : MonoBehaviour
                     timeText.text = a + b + "." + c + d;
                     if (nowTime < GameProcess2.instance.oneQuestionTime/3.0f)
                     {
-                        timeText.color = Color.red;
+                        timeText.color = new Color(232 / 255.0f, 110 / 255.0f, 95 / 255.0f);
                     }
                 }
                 else
