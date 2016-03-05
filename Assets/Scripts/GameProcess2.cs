@@ -124,8 +124,8 @@ public class GameProcess2 : MonoBehaviour
             SetButtonToNext();
 
         };
-        
-        
+
+
 
         ///setting
         if (StartSceneSetting.instance)
@@ -145,7 +145,7 @@ public class GameProcess2 : MonoBehaviour
             StartSceneSetting.instance.InitSoundBirds();
             oneQuestionTime = oneQuestionTime * (StartSceneSetting.instance.level + 1);
 
-            
+
         }
 
         GetQuestion();
@@ -189,23 +189,23 @@ public class GameProcess2 : MonoBehaviour
             go.transform.localScale = vec;
         });
     }
-//     public void OnDrag()
-//     {
-//         Vector3 vec = GameObject.Find("birds").transform.position;
-//         vec.y = Input.mousePosition.y;
-//         if (vec.y > Screen.height / 2)
-//         {
-//             vec.y = Screen.height / 2;
-//         }
-//         GameObject.Find("birds").transform.position = vec;
-// 
-//         if (StartSceneSetting.instance)
-//         {
-//             StartSceneSetting.instance.SetBGMVolumn(vec.y / (Screen.height / 2));
-//         }
-// 
-//         //Debug.Log("here" + Input.mousePosition);
-//     }
+    //     public void OnDrag()
+    //     {
+    //         Vector3 vec = GameObject.Find("birds").transform.position;
+    //         vec.y = Input.mousePosition.y;
+    //         if (vec.y > Screen.height / 2)
+    //         {
+    //             vec.y = Screen.height / 2;
+    //         }
+    //         GameObject.Find("birds").transform.position = vec;
+    // 
+    //         if (StartSceneSetting.instance)
+    //         {
+    //             StartSceneSetting.instance.SetBGMVolumn(vec.y / (Screen.height / 2));
+    //         }
+    // 
+    //         //Debug.Log("here" + Input.mousePosition);
+    //     }
     IEnumerator LoadLevelDelay(string name)
     {
 
@@ -272,8 +272,12 @@ public class GameProcess2 : MonoBehaviour
                 inputNumbers.Add(last.transform.GetChild(0).GetComponent<Text>().text);
             }
         }
-
-        PrintTypeInText();
+        if (resetButton.transform.GetChild(0).GetComponent<Text>().text != "下 一 题")
+        {
+            PrintTypeInText();
+        }
+       
+       
     }
 
     void PrintTypeInText()
@@ -292,11 +296,11 @@ public class GameProcess2 : MonoBehaviour
         {
             if (inputOperators.Count == 2)
             {
-          
+
                 sz += inputNumbers[0];
                 sz += inputOperators[0];
                 sz += inputNumbers[1];
-        
+
                 sz += inputOperators[1];
             }
             else//1
@@ -310,23 +314,23 @@ public class GameProcess2 : MonoBehaviour
         {
             if (inputOperators.Count == 3)
             {
-     
+
                 sz += inputNumbers[0];
                 sz += inputOperators[0];
                 sz += inputNumbers[1];
-          
+
                 sz += inputOperators[1];
                 sz += inputNumbers[2];
-            
+
                 sz += inputOperators[2];
             }
             else//2
             {
-        
+
                 sz += inputNumbers[0];
                 sz += inputOperators[0];
                 sz += inputNumbers[1];
-          
+
                 sz += inputOperators[1];
                 sz += inputNumbers[2];
             }
@@ -363,7 +367,7 @@ public class GameProcess2 : MonoBehaviour
                         sz += ")";
                         sz += inputOperators[1];
                         sz += "(";
-                        sz += inputNumbers[2];              
+                        sz += inputNumbers[2];
                         sz += inputOperators[2];
                         sz += inputNumbers[3];
                         sz += ")";
@@ -377,24 +381,24 @@ public class GameProcess2 : MonoBehaviour
                         sz += inputNumbers[0];
                         sz += inputOperators[0];
                         sz += "(";
-                        sz += inputNumbers[1];                       
-                        sz += inputOperators[1];                        
+                        sz += inputNumbers[1];
+                        sz += inputOperators[1];
                         sz += inputNumbers[2];
                         sz += "))";
                         sz += inputOperators[2];
-                        sz += inputNumbers[3];              
+                        sz += inputNumbers[3];
                         sz += " = ";
                         sz += recount;
                     }
                     break;
                 case RecountType.middleRight:
                     {
-                       
+
                         sz += inputNumbers[0];
                         sz += inputOperators[0];
                         sz += "((";
-                        sz += inputNumbers[1];                      
-                        sz += inputOperators[1];                    
+                        sz += inputNumbers[1];
+                        sz += inputOperators[1];
                         sz += inputNumbers[2];
                         sz += ")";
                         sz += inputOperators[2];
@@ -406,14 +410,14 @@ public class GameProcess2 : MonoBehaviour
                     break;
                 case RecountType.lastFirst:
                     {
-                
+
                         sz += inputNumbers[0];
                         sz += inputOperators[0];
                         sz += "(";
-                        sz += inputNumbers[1];              
+                        sz += inputNumbers[1];
                         sz += inputOperators[1];
                         sz += "(";
-                        sz += inputNumbers[2];            
+                        sz += inputNumbers[2];
                         sz += inputOperators[2];
                         sz += inputNumbers[3];
                         sz += "))";
@@ -429,7 +433,7 @@ public class GameProcess2 : MonoBehaviour
 
 
 
-           
+
 
             if (recount == "24")
             {
@@ -467,21 +471,21 @@ public class GameProcess2 : MonoBehaviour
         }
         float result = 0;
 
-		result = float.Parse(numbers[0]);
-		result = GetTwoNumberResult(result, float.Parse(numbers[1]), operators[0]);
-		result = GetTwoNumberResult(result, float.Parse(numbers[2]), operators[1]);
-		result = GetTwoNumberResult(result, float.Parse(numbers[3]), operators[2]);
-		if (result == 24)
-		{
-			rType = RecountType.firstFirst;
-			return result;
-		}
+        result = float.Parse(numbers[0]);
+        result = GetTwoNumberResult(result, float.Parse(numbers[1]), operators[0]);
+        result = GetTwoNumberResult(result, float.Parse(numbers[2]), operators[1]);
+        result = GetTwoNumberResult(result, float.Parse(numbers[3]), operators[2]);
+        if (result == 24)
+        {
+            rType = RecountType.firstFirst;
+            return result;
+        }
 
 
         result = float.Parse(numbers[3]);
-        result = GetTwoNumberResult(result, float.Parse(numbers[2]), operators[2]);
-        result = GetTwoNumberResult(result, float.Parse(numbers[1]), operators[1]);
-        result = GetTwoNumberResult(result, float.Parse(numbers[0]), operators[0]);
+        result = GetTwoNumberResult(float.Parse(numbers[2]), result, operators[2]);
+        result = GetTwoNumberResult(float.Parse(numbers[1]), result, operators[1]);
+        result = GetTwoNumberResult(float.Parse(numbers[0]), result, operators[0]);
         if (result == 24)
         {
             rType = RecountType.lastFirst;
@@ -523,10 +527,10 @@ public class GameProcess2 : MonoBehaviour
         }
 
 
-		result = float.Parse(numbers[0]);
-		result = GetTwoNumberResult(result, float.Parse(numbers[1]), operators[0]);
-		result = GetTwoNumberResult(result, float.Parse(numbers[2]), operators[1]);
-		result = GetTwoNumberResult(result, float.Parse(numbers[3]), operators[2]);
+        result = float.Parse(numbers[0]);
+        result = GetTwoNumberResult(result, float.Parse(numbers[1]), operators[0]);
+        result = GetTwoNumberResult(result, float.Parse(numbers[2]), operators[1]);
+        result = GetTwoNumberResult(result, float.Parse(numbers[3]), operators[2]);
 
 
         return result;
@@ -570,7 +574,7 @@ public class GameProcess2 : MonoBehaviour
             int c = 0;
             int d = 0;
             Random.seed = System.Environment.TickCount;
-            Debug.Log("Random.seed = "+Random.seed);
+            Debug.Log("Random.seed = " + Random.seed);
             if (isDebugRandom)
             {
                 Random.seed = debugNum;
